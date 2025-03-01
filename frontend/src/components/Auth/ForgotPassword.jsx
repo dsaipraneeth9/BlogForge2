@@ -20,10 +20,10 @@ function ForgotPassword() {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mx: 'auto', mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Forgot Password</Typography>
-      {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mx: 'auto', mt: 4, bgcolor: 'background.default' }}>
+      <Typography variant="h4" sx={{ color: 'text.primary', mb: 2 }} gutterBottom>Forgot Password</Typography>
+      {message && <Alert severity="success" sx={{ mb: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{message}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}
       <TextField
         label="Email"
         type="email"
@@ -31,8 +31,9 @@ function ForgotPassword() {
         margin="normal"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        sx={{ bgcolor: 'background.paper' }}
       />
-      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>Send Reset Link</Button>
+      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2, bgcolor: 'primary.main', color: 'white' }}>Send Reset Link</Button>
     </Box>
   );
 }

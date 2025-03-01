@@ -188,3 +188,4 @@ export const getBookmarkedBlogs = asyncHandler(async (req, res) => {
 
   res.status(200).json(bookmarkedBlogs);
 });
+

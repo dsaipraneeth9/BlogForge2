@@ -44,7 +44,7 @@
 
 import { useState } from 'react';
 import { Box, Card, CardContent, TextField, Button } from '@mui/material';
-import { updateBlog,getBlogs} from '../../services/api.js';
+import { updateBlog, getBlogs } from '../../services/api.js';
 
 function BlogCardUpdate({ blog, setBlogs, setSelectedBlog }) {
   const [title, setTitle] = useState(blog.title);
@@ -64,15 +64,13 @@ function BlogCardUpdate({ blog, setBlogs, setSelectedBlog }) {
       alert("Blog updated successfully!");
   
       try {
-        // ✅ Wrap getBlogs in another try-catch to prevent it from triggering the failure alert
         const updatedBlogs = await getBlogs({ author: blog.author });
         setBlogs(updatedBlogs.data.blogs);
       } catch (error) {
         console.error("Failed to fetch updated blogs:", error);
-       
       }
   
-      setSelectedBlog(null); // Close the editor after updating
+      setSelectedBlog(null);
     } catch (error) {
       console.error("Update failed:", error);
       alert("Failed to update blog.");
@@ -83,14 +81,15 @@ function BlogCardUpdate({ blog, setBlogs, setSelectedBlog }) {
   
 
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 3, bgcolor: 'background.default' }}>
       <Card
         sx={{
           transition: 'transform 0.3s ease, box-shadow 0.3s ease',
           '&:hover': {
-            transform: 'scale(1.02)', // Slight scale on hover
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', // Enhanced shadow on hover
+            transform: 'scale(1.02)',
+            boxShadow: theme => `0 4px 8px rgba(${theme.palette.mode === 'dark' ? '255, 255, 255' : '0, 0, 0'}, 0.1)`,
           },
+          bgcolor: 'background.paper',
         }}
       >
         <CardContent>
@@ -99,7 +98,7 @@ function BlogCardUpdate({ blog, setBlogs, setSelectedBlog }) {
             label="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            sx={{ mb: 2, '& .MuiInputLabel-root': { color: '#b8860b' } }} // Optional: style the label in dark goldenrod
+            sx={{ mb: 2, bgcolor: 'background.paper', '& .MuiInputLabel-root': { color: 'text.secondary' } }}
           />
           <TextField
             fullWidth
@@ -108,7 +107,7 @@ function BlogCardUpdate({ blog, setBlogs, setSelectedBlog }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={4}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, bgcolor: 'background.paper' }}
           />
           {blog.featuredImage && (
             <img
@@ -129,8 +128,10 @@ function BlogCardUpdate({ blog, setBlogs, setSelectedBlog }) {
             disabled={loading}
             sx={{
               mt: 2,
+              bgcolor: 'primary.main',
+              color: 'white',
               '&:hover': {
-                backgroundColor: '#1565c0', // Darker primary color on hover
+                backgroundColor: '#1565c0',
                 transition: 'background-color 0.3s ease',
               },
             }}
@@ -138,13 +139,15 @@ function BlogCardUpdate({ blog, setBlogs, setSelectedBlog }) {
             {loading ? 'Updating...' : 'Update'}
           </Button>
           <Button
-            onClick={() => setSelectedBlog(null)} // Cancel editing
+            onClick={() => setSelectedBlog(null)}
             variant="outlined"
             sx={{
               mt: 2,
               ml: 2,
+              color: 'primary.main',
+              bgcolor: 'transparent',
               '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)', // Subtle hover effect
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 transition: 'background-color 0.3s ease',
               },
             }}

@@ -3,8 +3,8 @@ import { Box, Typography, Grid, Card, CardContent, CardMedia, Alert, Button, Ico
 import { AuthContext } from '../../contexts/AuthContext.jsx';
 import { getBlogs, deleteBlog } from '../../services/api.js';
 import BlogCardUpdate from '../Blog/BlogCardUpdate.jsx';
-import { Bookmark, BookmarkBorder } from '@mui/icons-material'; // Added bookmark icons
-import { toggleBookmarkBlog } from '../../services/api.js'; // Added toggleBookmarkBlog
+import { Bookmark, BookmarkBorder } from '@mui/icons-material';
+import { toggleBookmarkBlog } from '../../services/api.js';
 
 function AuthorDashboard() {
   const { user } = useContext(AuthContext);
@@ -97,9 +97,9 @@ function AuthorDashboard() {
   if (!user) return <div>User not found</div>;
 
   return (
-    <Box sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>Author Dashboard</Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', width: '100vw', p: 2, boxSizing: 'border-box' }}>
+      <Typography variant="h4" sx={{ color: 'text.primary', mb: 2 }} gutterBottom>Author Dashboard</Typography>
+      {error && <Alert severity="error" sx={{ mb: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}
 
       {selectedBlog && (
         <BlogCardUpdate
@@ -109,33 +109,36 @@ function AuthorDashboard() {
         />
       )}
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ bgcolor: 'background.default', width: '100%', justifyContent: 'flex-start', ml: -1 }}>
         {blogs.map((blog) => (
-          <Grid item xs={12} sm={6} md={4} key={blog._id}>
+          <Grid item xs={12} sm={6} md={3.8} key={blog._id}> {/* Changed md={3} to md={3.8} to match Home */}
             <Card
               sx={{
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                 '&:hover': {
                   transform: 'scale(1.05)',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                  boxShadow: theme => `0 4px 8px rgba(${theme.palette.mode === 'dark' ? '255, 255, 255' : '0, 0, 0'}, 0.2)`,
                 },
+                bgcolor: 'background.paper',
+                border: theme => theme.palette.mode === 'dark' ? '2px solid #ffffff' : '2px solid #e0e0e0', // White border in dark mode, light gray in light mode
+                boxShadow: theme => theme.palette.mode === 'dark' ? '0 0 10px rgba(255, 255, 255, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.2)', // White shadow effect in dark mode
               }}
             >
               {blog.featuredImage && (
                 <CardMedia
                   component="img"
-                  height="140"
+                  height="250" // Maintain increased height for more image visibility
                   image={blog.featuredImage}
                   alt={blog.title}
-                  sx={{ objectFit: 'cover' }}
+                  sx={{ objectFit: 'cover', maxWidth: '100%' }}
                 />
               )}
               <CardContent>
-                <Typography variant="h6" sx={{ color: '#b8860b' }}>{blog.title}</Typography>
+                <Typography variant="h6" sx={{ color: 'primary.main' }}>{blog.title}</Typography>
                 <Typography variant="body2" color="text.secondary">
-                  By <span style={{ color: '#333' }}>{blog.author?.username}</span> | {new Date(blog.createdAt).toLocaleDateString()}
+                  By <span style={{ color: 'text.primary' }}>{blog.author?.username}</span> | {new Date(blog.createdAt).toLocaleDateString()}
                 </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, bgcolor: 'background.paper' }}>
                   <Box>
                     <Button
                       variant="outlined"
@@ -147,6 +150,8 @@ function AuthorDashboard() {
                           backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           transition: 'background-color 0.3s ease',
                         },
+                        color: 'primary.main',
+                        bgcolor: 'transparent',
                       }}
                     >
                       Edit
@@ -161,6 +166,7 @@ function AuthorDashboard() {
                           backgroundColor: 'rgba(255, 0, 0, 0.1)',
                           transition: 'background-color 0.3s ease',
                         },
+                        bgcolor: 'transparent',
                       }}
                     >
                       Delete
@@ -182,7 +188,6 @@ function AuthorDashboard() {
 }
 
 export default AuthorDashboard;
-
 
 
 // import { useContext, useState, useEffect } from 'react';

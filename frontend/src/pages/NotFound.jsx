@@ -1,16 +1,16 @@
-import { Typography, Box } from '@mui/material'
-import { Link } from 'react-router-dom'
+import { Typography, Box } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 function NotFound() {
   return (
-    <Box sx={{ textAlign: 'center', mt: 8 }}>
-      <Typography variant="h2" gutterBottom>404</Typography>
-      <Typography variant="h5" gutterBottom>Page Not Found</Typography>
-      <Typography>
-        Go back to <Link to="/">Home</Link>
+    <Box sx={{ textAlign: 'center', mt: 8, bgcolor: 'background.default' }}>
+      <Typography variant="h2" sx={{ color: 'text.primary' }} gutterBottom>404</Typography>
+      <Typography variant="h5" sx={{ color: 'text.primary' }} gutterBottom>Page Not Found</Typography>
+      <Typography sx={{ color: 'text.primary' }}>
+        Go back to <Link to="/" style={{ color: 'primary.main' }}>Home</Link>
       </Typography>
     </Box>
-  )
+  );
 }
 
-export default NotFound
+export default NotFound;

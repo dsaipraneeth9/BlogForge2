@@ -28,20 +28,20 @@ function Home() {
   }, [page]);
 
   return (
-    <>
-      <Typography variant="h4" gutterBottom>Latest Posts</Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <Grid container spacing={3}>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', width: '100vw', p: 0, boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <Typography variant="h4" sx={{ color: 'text.primary', mb: 2, px: 2 , ml :2}} gutterBottom>Latest Posts</Typography>
+      {error && <Alert severity="error" sx={{ mb: 2, bgcolor: 'background.paper', color: 'text.primary', px: 2 }}> {error}</Alert>}
+      <Grid container spacing={3} sx={{ bgcolor: 'background.default', width: '100%', px: 2, justifyContent: 'flex-start', ml: -1 }}>
         {blogs.map((blog) => (
-          <Grid item xs={12} sm={6} md={4} key={blog._id}>
+          <Grid item xs={12} sm={6} md={3.8} key={blog._id}> {/* Changed md={4} to md={3} to decrease width */}
             <BlogCard blog={blog} />
           </Grid>
         ))}
       </Grid>
-      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-        <Pagination count={totalPages} page={page} onChange={(e, value) => setPage(value)} color="primary" />
+      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', bgcolor: 'background.default', width: '100%', px: 2 }}>
+        <Pagination count={totalPages} page={page} onChange={(e, value) => setPage(value)} color="primary" sx={{ bgcolor: 'background.paper' }} />
       </Box>
-    </>
+    </Box>
   );
 }
 

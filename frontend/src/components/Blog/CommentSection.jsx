@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Box, TextField, Button, Typography, List, ListItem, ListItemText, IconButton, Divider, Avatar } from '@mui/material';
+import { Box, TextField, Button, Typography, List, ListItem, ListItemText, IconButton, Divider, Avatar, Alert } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { createComment, getComments, deleteComment } from '../../services/api.js';
 import { AuthContext } from '../../contexts/AuthContext.jsx';
@@ -8,15 +8,18 @@ function CommentSection({ slug }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const { user } = useContext(AuthContext);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
         const response = await getComments(slug);
         console.log('Fetched comments:', response.data);
-        setComments(response.data);
+        setComments(response.data || []); // Ensure comments is always an array
+        setError('');
       } catch (error) {
         console.error('Error fetching comments:', error);
+        setError('Failed to fetch comments');
       }
     };
     fetchComments();
@@ -24,39 +27,53 @@ function CommentSection({ slug }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!user) {
+      setError('Please log in to post a comment');
+      return;
+    }
     try {
       const response = await createComment(slug, newComment);
-      setComments((prev) => [response.data, ...prev]);
+      setComments([response.data, ...comments]);
       setNewComment('');
+      setError('');
     } catch (error) {
       console.error('Error posting comment:', error);
+      setError('Failed to post comment');
     }
   };
 
   const handleDelete = async (commentId) => {
-    try {
-      console.log(`Attempting to delete comment with ID ${commentId} from blog slug ${slug} by user ${user?.id} (role: ${user?.role})`);
-      await deleteComment(slug, commentId);
-      setComments((prev) => prev.filter((c) => c._id !== commentId));
-    } catch (error) {
-      console.error('Error deleting comment - Full error:', error);
-      alert('Failed to delete comment: ' + (error.response?.data?.message || 'Unknown error'));
+    if (!user) {
+      setError('Please log in to delete comments');
+      return;
+    }
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      try {
+        await deleteComment(slug, commentId);
+        setComments(comments.filter((c) => c._id !== commentId));
+        setError('');
+      } catch (err) {
+        setError('Failed to delete comment');
+        console.error('Error deleting comment:', err);
+      }
     }
   };
 
   const canDeleteComment = (comment) => {
-    console.log('Checking if user can delete comment - User:', user, 'Comment User ID:', comment.user._id);
-    // Allow deletion if the user is the comment owner (user/author) or an admin
-    const canDelete = user && (user.role === 'admin' || comment.user._id === user.id);
-    console.log('Can delete:', canDelete);
-    return canDelete;
+    // Safely check if user and comment.user exist before accessing properties
+    if (!user || !comment?.user) {
+      return false; // Default to false if user or comment.user is undefined
+    }
+    const userId = user.id?.toString(); // Ensure user.id is a string or handle undefined
+    const commentUserId = comment.user._id?.toString(); // Ensure comment.user._id is a string or handle undefined
+    return user.role === 'admin' || (userId && commentUserId && userId === commentUserId);
   };
 
   return (
-    <Box>
-      <Typography variant="h5" gutterBottom>Comments</Typography>
+    <Box sx={{ bgcolor: 'background.default' }}>
+      <Typography variant="h5" sx={{ color: 'text.primary', bgcolor: 'background.paper', p: 2 }} gutterBottom>Comments</Typography>
       {user ? (
-        <Box component="form" onSubmit={handleSubmit} sx={{ mb: 2 }}>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mb: 2, bgcolor: 'background.paper', p: 2 }}>
           <TextField
             label="Add a comment"
             fullWidth
@@ -64,46 +81,48 @@ function CommentSection({ slug }) {
             rows={3}
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
+            sx={{ bgcolor: 'background.paper', color: 'text.primary' }}
           />
-          <Button type="submit" variant="contained" sx={{ mt: 1 }}>Post Comment</Button>
+          <Button type="submit" variant="contained" sx={{ mt: 1, color: 'white', bgcolor: 'primary.main' }}>
+            Post Comment
+          </Button>
+          {error && <Alert severity="error" sx={{ mt: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}
         </Box>
       ) : (
-        <Typography>Please login to comment</Typography>
+        <Typography sx={{ color: 'text.primary', bgcolor: 'background.paper', p: 2 }}>Please login to comment</Typography>
       )}
-      <List>
-        {comments.map((comment, index) => (
+      <List sx={{ bgcolor: 'background.paper' }}>
+        {comments.map((comment) => (
           <div key={comment._id}>
             <ListItem
               secondaryAction={
                 canDeleteComment(comment) && (
-                  <IconButton edge="end" onClick={() => handleDelete(comment._id)}>
+                  <IconButton edge="end" onClick={() => handleDelete(comment._id)} sx={{ color: 'error.main' }}>
                     <Delete />
                   </IconButton>
                 )
               }
+              sx={{ bgcolor: 'background.paper' }}
             >
               <ListItemText
                 primary={comment.content}
                 secondary={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Avatar src={comment.user.photo} alt={comment.user.username} sx={{ width: 24, height: 24 }} />
-                    {`By ${comment.user.username} - ${new Date(comment.createdAt).toLocaleDateString()}`}
+                    <Avatar src={comment.user?.photo || ''} alt={comment.user?.username || 'Anonymous'} sx={{ width: 24, height: 24 }} />
+                    {`By ${comment.user?.username || 'Anonymous'} - ${new Date(comment.createdAt).toLocaleDateString()}`}
                   </Box>
                 }
                 sx={{
-                  '& .MuiListItemText-primary': {
-                    fontSize: '1.4rem', // Increase font size for primary text (comment content)
-                  },
-                  '& .MuiListItemText-secondary': {
-                    fontSize: '0.9rem', // Optional: Adjust font size for secondary text (username and date)
-                  },
+                  '& .MuiListItemText-primary': { color: 'text.primary' },
+                  '& .MuiListItemText-secondary': { color: 'text.secondary' },
                 }}
               />
             </ListItem>
-            {index < comments.length - 1 && <Divider />}
+            <Divider sx={{ bgcolor: 'background.paper', borderColor: 'text.secondary' }} />
           </div>
         ))}
       </List>
+      {error && !user && <Alert severity="error" sx={{ mt: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}
     </Box>
   );
 }

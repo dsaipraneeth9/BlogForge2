@@ -10,6 +10,8 @@ import expressAsyncHandler from "express-async-handler";
 let upload = multer({ storage: storage });
 let router = Router();
 
+router.get("/bookmarks", auth, getBookmarkedBlogs); // New route for bookmarked blogs
+
 // Public routes
 router.get("/", getBlogs);
 router.get("/:slug", getBlog);
@@ -32,7 +34,6 @@ router.delete("/:slug", auth, expressAsyncHandler(async (req, res, next) => {
 
 router.post("/:slug/like", auth, ToggleLikeBlog);
 router.post("/:slug/bookmark", auth, toggleBookmarkBlog); // New route for bookmarking
-router.get("/bookmarks", auth, getBookmarkedBlogs); // New route for bookmarked blogs
 
 router.post("/:slug/comments", auth, createComment);
 router.get("/:slug/comments", auth, getComments);

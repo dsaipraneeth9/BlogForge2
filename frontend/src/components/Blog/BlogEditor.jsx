@@ -1,7 +1,8 @@
 import 'react-quill/dist/quill.snow.css';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { TextField, Button, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import ReactQuill from "react-quill";
+import ReactQuill from 'react-quill';
+import { ThemeContext } from '../../contexts/ThemeContext.jsx';
 
 function BlogEditor({ onSubmit, initialData = {} }) {
   console.log('Rendering BlogEditor with initialData:', initialData);
@@ -9,6 +10,7 @@ function BlogEditor({ onSubmit, initialData = {} }) {
   const [content, setContent] = useState(initialData.content || '');
   const [category, setCategory] = useState(initialData.categories || '');
   const [featuredImage, setFeaturedImage] = useState(null);
+  const { mode } = useContext(ThemeContext);
 
   const categories = [
     'Technology', 'Health & Fitness', 'Lifestyle', 'Travel', 'Food & Drink',
@@ -29,36 +31,69 @@ function BlogEditor({ onSubmit, initialData = {} }) {
     onSubmit(formData);
   };
 
+  const quillStyles = `
+    .ql-toolbar {
+      background-color: ${mode === 'dark' ? '#1e1e1e' : '#ffffff'} !important;
+      border-color: ${mode === 'dark' ? '#b0b0b0' : '#333333'} !important;
+    }
+    .ql-toolbar .ql-picker-label,
+    .ql-toolbar .ql-picker-item,
+    .ql-toolbar button {
+      color: ${mode === 'dark' ? '#ffffff' : '#000000'} !important;
+    }
+    .ql-editor {
+      background-color: ${mode === 'dark' ? '#1e1e1e' : '#ffffff'} !important;
+      color: ${mode === 'dark' ? '#ffffff' : '#000000'} !important;
+    }
+    .ql-container {
+      border-color: ${mode === 'dark' ? '#b0b0b0' : '#333333'} !important;
+    }
+    .ql-snow .ql-tooltip {
+      background-color: ${mode === 'dark' ? '#1e1e1e' : '#ffffff'} !important;
+      color: ${mode === 'dark' ? '#ffffff' : '#000000'} !important;
+      border-color: ${mode === 'dark' ? '#b0b0b0' : '#333333'} !important;
+    }
+  `;
+
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4, bgcolor: 'background.default' }}>
       <TextField
         label="Title"
         fullWidth
         margin="normal"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        sx={{ bgcolor: 'background.paper', '& .MuiInputLabel-root': { color: 'text.secondary' } }}
       />
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Category</InputLabel>
-        <Select value={category} onChange={(e) => setCategory(e.target.value)}>
+      <FormControl fullWidth margin="normal" sx={{ bgcolor: 'background.paper' }}>
+        <InputLabel sx={{ color: 'text.secondary' }}>Category</InputLabel>
+        <Select value={category} onChange={(e) => setCategory(e.target.value)} sx={{ color: 'text.primary' }}>
           {categories.map((cat) => (
-            <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+            <MenuItem key={cat} value={cat} sx={{ color: 'text.primary' }}>{cat}</MenuItem>
           ))}
         </Select>
       </FormControl>
+      <style>{quillStyles}</style>
       <ReactQuill
         theme="snow"
         value={content}
         onChange={setContent}
         style={{ height: 300, marginBottom: 50 }}
       />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setFeaturedImage(e.target.files[0])}
-        style={{ marginTop: 20 }}
-      />
-      <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+      <Button
+        variant="outlined"
+        component="label"
+        sx={{ mt: 2, bgcolor: 'background.paper', color: 'text.primary', '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' } }}
+      >
+        Choose File
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setFeaturedImage(e.target.files[0])}
+          hidden
+        />
+      </Button>
+      <Button type="submit" variant="contained" sx={{ mt: 2, bgcolor: 'primary.main', color: 'white' }}>
         {initialData.title ? 'Update Post' : 'Create Post'}
       </Button>
     </Box>
@@ -70,7 +105,10 @@ export default function SafeBlogEditor(props) {
     return <BlogEditor {...props} />;
   } catch (error) {
     console.error('BlogEditor error:', error);
-    return <div>Error loading editor</div>;
+    return (
+      <Box sx={{ bgcolor: 'background.default', p: 2 }}>
+        <Typography variant="body1" sx={{ color: 'text.primary' }}>Error loading editor</Typography>
+      </Box>
+    );
   }
 }
-

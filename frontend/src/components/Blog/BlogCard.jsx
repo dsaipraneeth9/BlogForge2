@@ -40,15 +40,18 @@ function BlogCard({ blog }) {
           transform: 'scale(1.05)',
           boxShadow: theme => `0 4px 8px rgba(${theme.palette.mode === 'dark' ? '255, 255, 255' : '0, 0, 0'}, 0.2)`,
         },
-        bgcolor: 'background.paper', // Theme-aware background for the card
+        bgcolor: 'background.paper',
+        border: theme => theme.palette.mode === 'dark' ? '2px solid #ffffff' : '2px solid #e0e0e0', // White border in dark mode, light gray in light mode
+        boxShadow: theme => theme.palette.mode === 'dark' ? '0 0 10px rgba(255, 255, 255, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.2)', // White shadow effect in dark mode
       }}
     >
       {blog.featuredImage && (
         <CardMedia
           component="img"
-          height="140"
+          height="250" // Increased from 140 to 200 for more image visibility
           image={blog.featuredImage}
           alt={blog.title}
+          sx={{ objectFit: 'cover', maxWidth: '100%' }}
         />
       )}
       <CardContent>
@@ -61,18 +64,20 @@ function BlogCard({ blog }) {
         <Typography variant="body2" color="text.primary">
           {getExcerpt(blog.content)}
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1, bgcolor: 'background.paper' }}>
           <Button
             component={Link}
             to={`/blog/${blog.slug}`}
             size="small"
             sx={{
+              mt: 1,
               '&:hover': {
                 backgroundColor: 'primary.main',
                 color: 'white',
                 transition: 'background-color 0.3s ease, color 0.3s ease',
               },
-              bgcolor: 'transparent', // Use theme for button background
+              bgcolor: 'transparent',
+              color: 'text.primary',
             }}
           >
             Read More

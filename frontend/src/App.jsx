@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { Container } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import Header from './components/Common/Header.jsx';
 import Footer from './components/Common/Footer.jsx';
@@ -22,9 +22,9 @@ function App() {
   const location = useLocation();
 
   return (
-    <>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', width: '100vw', display: 'flex', flexDirection: 'column' }}>
       <Header />
-      <Container maxWidth="lg" sx={{ py: 4, flex: 1 }}>
+      <Container maxWidth={false} sx={{ py: 4, flex: 1, bgcolor: 'background.default', px: 2 }}>
         <TransitionGroup>
           <CSSTransition
             key={location.pathname}
@@ -60,7 +60,7 @@ function App() {
         </TransitionGroup>
       </Container>
       <Footer />
-    </>
+    </Box>
   );
 }
 

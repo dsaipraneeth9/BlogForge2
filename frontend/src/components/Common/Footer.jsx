@@ -1,13 +1,15 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 function Footer() {
   return (
-    <Box sx={{ py: 2, textAlign: 'center', mt: 4, borderTop: '1px solid #e0e0e0' }}>
-      <Typography variant="body2" color="text.secondary">
-        © 2025 BlogForge. All rights reserved.
+    <Box sx={{ bgcolor: 'background.default', p: 2, mt: 'auto', textAlign: 'center' }}>
+      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        © 2025 BlogForge. All rights reserved. | 
+        <Link to="/" style={{ color: 'primary.main', ml: 1 }}>Home</Link>
       </Typography>
     </Box>
-  )
+  );
 }
 
-export default Footer
+export default Footer;

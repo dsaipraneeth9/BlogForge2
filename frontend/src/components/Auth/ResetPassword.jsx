@@ -25,10 +25,10 @@ function ResetPassword() {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mx: 'auto', mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Reset Password</Typography>
-      {message && <Alert severity="success" sx={{ mb: 2 }}>{message}</Alert>}
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mx: 'auto', mt: 4, bgcolor: 'background.default' }}>
+      <Typography variant="h4" sx={{ color: 'text.primary', mb: 2 }} gutterBottom>Reset Password</Typography>
+      {message && <Alert severity="success" sx={{ mb: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{message}</Alert>}
+      {error && <Alert severity="error" sx={{ mb: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}
       <TextField
         label="New Password"
         type="password"
@@ -36,6 +36,7 @@ function ResetPassword() {
         margin="normal"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        sx={{ bgcolor: 'background.paper' }}
       />
       <TextField
         label="Confirm Password"
@@ -44,8 +45,9 @@ function ResetPassword() {
         margin="normal"
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
+        sx={{ bgcolor: 'background.paper' }}
       />
-      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2 }}>Reset Password</Button>
+      <Button type="submit" variant="contained" fullWidth sx={{ mt: 2, bgcolor: 'primary.main', color: 'white' }}>Reset Password</Button>
     </Box>
   );
 }

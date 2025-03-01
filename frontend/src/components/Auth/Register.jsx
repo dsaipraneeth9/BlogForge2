@@ -32,19 +32,19 @@ function Register() {
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mx: 'auto', mt: 4 }}>
-      <Typography variant="h4" gutterBottom>Register</Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      <TextField label="Username" name="username" fullWidth margin="normal" onChange={handleChange} />
-      <TextField label="Email" name="email" type="email" fullWidth margin="normal" onChange={handleChange} />
-      <TextField label="Password" name="password" type="password" fullWidth margin="normal" onChange={handleChange} />
-      <TextField label="Confirm Password" name="confirmPassword" type="password" fullWidth margin="normal" onChange={handleChange} />
+    <Box component="form" onSubmit={handleSubmit} sx={{ maxWidth: 400, mx: 'auto', mt: 4, bgcolor: 'background.default' }}>
+      <Typography variant="h4" sx={{ color: 'text.primary', mb: 2 }} gutterBottom>Register</Typography>
+      {error && <Alert severity="error" sx={{ mb: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}
+      <TextField label="Username" name="username" fullWidth margin="normal" onChange={handleChange} sx={{ bgcolor: 'background.paper' }} />
+      <TextField label="Email" name="email" type="email" fullWidth margin="normal" onChange={handleChange} sx={{ bgcolor: 'background.paper' }} />
+      <TextField label="Password" name="password" type="password" fullWidth margin="normal" onChange={handleChange} sx={{ bgcolor: 'background.paper' }} />
+      <TextField label="Confirm Password" name="confirmPassword" type="password" fullWidth margin="normal" onChange={handleChange} sx={{ bgcolor: 'background.paper' }} />
       <FormControl fullWidth margin="normal">
-        <InputLabel>Role</InputLabel>
-        <Select name="role" value={formData.role} onChange={handleChange}>
-          <MenuItem value="user">User</MenuItem>
-          <MenuItem value="author">Author</MenuItem>
-          <MenuItem value="admin">Admin</MenuItem> {/* Added admin option */}
+        <InputLabel sx={{ color: 'text.primary' }}>Role</InputLabel>
+        <Select name="role" value={formData.role} onChange={handleChange} sx={{ bgcolor: 'background.paper' }}>
+          <MenuItem value="user" sx={{ color: 'text.primary' }}>User</MenuItem>
+          <MenuItem value="author" sx={{ color: 'text.primary' }}>Author</MenuItem>
+          <MenuItem value="admin" sx={{ color: 'text.primary' }}>Admin</MenuItem>
         </Select>
       </FormControl>
       <input type="file" name="photo" accept="image/*" onChange={handleChange} style={{ marginTop: 16 }} />
@@ -54,6 +54,8 @@ function Register() {
         fullWidth
         sx={{
           mt: 2,
+          bgcolor: 'primary.main',
+          color: 'white',
           '&:hover': {
             backgroundColor: '#1565c0',
             transition: 'background-color 0.3s ease',
