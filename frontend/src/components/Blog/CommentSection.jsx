@@ -83,7 +83,7 @@ function CommentSection({ slug }) {
             onChange={(e) => setNewComment(e.target.value)}
             sx={{ bgcolor: 'background.paper', color: 'text.primary' }}
           />
-          <Button type="submit" variant="contained" sx={{ mt: 1, color: 'white', bgcolor: 'primary.main' }}>
+          <Button type="submit" variant="contained" sx={{ mt: 1, color: 'Green', bgcolor: 'powderBlue' }}>
             Post Comment
           </Button>
           {error && <Alert severity="error" sx={{ mt: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}

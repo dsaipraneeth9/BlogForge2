@@ -32,7 +32,7 @@ const blogSchema = new Schema({
     required: true
   },
   featuredImage: {
-    type: String
+    type: String,
   },
   views: {
     type: Number,

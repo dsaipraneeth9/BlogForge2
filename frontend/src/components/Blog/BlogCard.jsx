@@ -4,10 +4,12 @@ import { Bookmark, BookmarkBorder } from '@mui/icons-material';
 import { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../../contexts/AuthContext.jsx';
 import { toggleBookmarkBlog } from '../../services/api.js';
+import { useTheme } from '@mui/material/styles'; // Import useTheme to access the current theme
 
 function BlogCard({ blog }) {
   const { user } = useContext(AuthContext);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const theme = useTheme(); // Access the current theme to check mode
 
   useEffect(() => {
     if (user && blog.bookmarks) {
@@ -48,7 +50,7 @@ function BlogCard({ blog }) {
       {blog.featuredImage && (
         <CardMedia
           component="img"
-          height="250" // Increased from 140 to 200 for more image visibility
+          height="250"
           image={blog.featuredImage}
           alt={blog.title}
           sx={{ objectFit: 'cover', maxWidth: '100%' }}
@@ -83,7 +85,15 @@ function BlogCard({ blog }) {
             Read More
           </Button>
           {user && (
-            <IconButton onClick={handleBookmarkToggle} aria-label={isBookmarked ? 'Remove Bookmark' : 'Bookmark'} sx={{ color: isBookmarked ? 'black' : 'inherit' }}>
+            <IconButton 
+              onClick={handleBookmarkToggle} 
+              aria-label={isBookmarked ? 'Remove Bookmark' : 'Bookmark'} 
+              sx={{
+                color: isBookmarked 
+                  ? (theme.palette.mode === 'dark' ? '#ffffff' : '#000000') // White fill in dark mode, black in light mode
+                  : (theme.palette.mode === 'dark' ? '#ffffff' : 'inherit'), // White outline in dark mode, inherit in light mode
+              }}
+            >
               {isBookmarked ? <Bookmark /> : <BookmarkBorder />}
             </IconButton>
           )}

@@ -1,16 +1,21 @@
 import { useContext, useState, useEffect } from 'react';
-import { Box, Typography, Grid, Card, CardContent, CardMedia, Alert, Button, IconButton } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, CardMedia, Alert, Button, IconButton, Pagination } from '@mui/material';
 import { AuthContext } from '../../contexts/AuthContext.jsx';
 import { getBlogs, deleteBlog } from '../../services/api.js';
 import BlogCardUpdate from '../Blog/BlogCardUpdate.jsx';
 import { Bookmark, BookmarkBorder } from '@mui/icons-material';
 import { toggleBookmarkBlog } from '../../services/api.js';
+import { useTheme } from '@mui/material/styles'; // Import useTheme to access the current theme
 
 function AuthorDashboard() {
   const { user } = useContext(AuthContext);
   const [blogs, setBlogs] = useState([]);
   const [selectedBlog, setSelectedBlog] = useState(null);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 3; // Same limit as Home component
+  const theme = useTheme(); // Access the current theme for dark mode styling
 
   console.log('Rendering AuthorDashboard with user:', user);
 
@@ -23,8 +28,17 @@ function AuthorDashboard() {
           console.warn('User or user.id is missing:', user);
           return;
         }
-        const response = await getBlogs({ author: user.id });
+        
+        // Add pagination parameters to the query
+        const params = { 
+          author: user.id,
+          page,
+          limit
+        };
+        
+        const response = await getBlogs(params);
         setBlogs(response.data.blogs);
+        setTotalPages(response.data.pages);
         setError('');
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch blogs');
@@ -32,7 +46,7 @@ function AuthorDashboard() {
       }
     };
     if (user) fetchBlogs();
-  }, [user]);
+  }, [user, page]); // Add page as a dependency to refetch when page changes
 
   const handleDelete = async (blogSlug) => {
     if (!blogSlug) {
@@ -50,6 +64,18 @@ function AuthorDashboard() {
           setBlogs(blogs.filter((blog) => blog.slug !== blogSlug));
           setError('');
           alert('Blog deleted successfully!');
+          
+          // Refresh blog list to update pagination if necessary
+          const remainingBlogsOnPage = blogs.filter(blog => blog.slug !== blogSlug).length;
+          if (remainingBlogsOnPage === 0 && page > 1) {
+            setPage(page - 1); // Go to previous page if current page becomes empty
+          } else {
+            // Refetch current page
+            const params = { author: user.id, page, limit };
+            const response = await getBlogs(params);
+            setBlogs(response.data.blogs);
+            setTotalPages(response.data.pages);
+          }
         } else {
           throw new Error(`Unexpected response status: ${response.status}`);
         }
@@ -111,7 +137,7 @@ function AuthorDashboard() {
 
       <Grid container spacing={3} sx={{ bgcolor: 'background.default', width: '100%', justifyContent: 'flex-start', ml: -1 }}>
         {blogs.map((blog) => (
-          <Grid item xs={12} sm={6} md={3.8} key={blog._id}> {/* Changed md={3} to md={3.8} to match Home */}
+          <Grid item xs={12} sm={6} md={3.8} key={blog._id}>
             <Card
               sx={{
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease',
@@ -120,14 +146,14 @@ function AuthorDashboard() {
                   boxShadow: theme => `0 4px 8px rgba(${theme.palette.mode === 'dark' ? '255, 255, 255' : '0, 0, 0'}, 0.2)`,
                 },
                 bgcolor: 'background.paper',
-                border: theme => theme.palette.mode === 'dark' ? '2px solid #ffffff' : '2px solid #e0e0e0', // White border in dark mode, light gray in light mode
-                boxShadow: theme => theme.palette.mode === 'dark' ? '0 0 10px rgba(255, 255, 255, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.2)', // White shadow effect in dark mode
+                border: theme => theme.palette.mode === 'dark' ? '2px solid #ffffff' : '2px solid #e0e0e0',
+                boxShadow: theme => theme.palette.mode === 'dark' ? '0 0 10px rgba(255, 255, 255, 0.3)' : '0 4px 8px rgba(0, 0, 0, 0.2)',
               }}
             >
               {blog.featuredImage && (
                 <CardMedia
                   component="img"
-                  height="250" // Maintain increased height for more image visibility
+                  height="250"
                   image={blog.featuredImage}
                   alt={blog.title}
                   sx={{ objectFit: 'cover', maxWidth: '100%' }}
@@ -173,7 +199,15 @@ function AuthorDashboard() {
                     </Button>
                   </Box>
                   {user && (
-                    <IconButton onClick={() => handleBookmarkToggle(blog.slug)} aria-label={blog.bookmarks.includes(user.id) ? 'Remove Bookmark' : 'Bookmark'} sx={{ color: blog.bookmarks.includes(user.id) ? 'black' : 'inherit' }}>
+                    <IconButton 
+                      onClick={() => handleBookmarkToggle(blog.slug)} 
+                      aria-label={blog.bookmarks.includes(user.id) ? 'Remove Bookmark' : 'Bookmark'} 
+                      sx={{
+                        color: blog.bookmarks.includes(user.id) 
+                          ? (theme.palette.mode === 'dark' ? '#ffffff' : '#000000') // White fill in dark mode, black in light mode
+                          : (theme.palette.mode === 'dark' ? '#ffffff' : 'inherit'), // White outline in dark mode, inherit in light mode
+                      }}
+                    >
                       {blog.bookmarks.includes(user.id) ? <Bookmark /> : <BookmarkBorder />}
                     </IconButton>
                   )}
@@ -183,6 +217,17 @@ function AuthorDashboard() {
           </Grid>
         ))}
       </Grid>
+      
+      {/* Pagination component */}
+      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center', bgcolor: 'background.default', width: '100%' }}>
+        <Pagination 
+          count={totalPages} 
+          page={page} 
+          onChange={(e, value) => setPage(value)} 
+          color="primary" 
+          sx={{ bgcolor: 'background.paper' }}
+        />
+      </Box>
     </Box>
   );
 }
