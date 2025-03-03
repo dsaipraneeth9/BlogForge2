@@ -73,6 +73,11 @@ export const getBlogs = asyncHandler(async (req, res) => {
     query.author = req.query.author; // Filter by author ID
   }
 
+  // Handle category filter
+  if (req.query.category) {
+    query.categories = req.query.category; // Filter by category
+  }
+
   // Handle suggestions limit (e.g., for real-time search)
   let limit = parseInt(req.query.limit) || 3;
   if (req.query.search && !req.query.page) { // If no page is specified and there's a search, assume it's for suggestions
@@ -83,10 +88,16 @@ export const getBlogs = asyncHandler(async (req, res) => {
   let page = parseInt(req.query.page) || 1;
   let skip = (page - 1) * limit;
 
+  // Sorting
+  let sortOption = '-createdAt'; // Default sort by latest
+  if (req.query.sortBy === 'views') {
+    sortOption = '-views'; // Sort by views descending for popularity
+  }
+
   let totalBlogs = await Blog.countDocuments(query);
   let blogs = await Blog.find(query)
     .populate("author", "username photo email -_id")
-    .sort("-createdAt")
+    .sort(sortOption) // Dynamic sort option
     .skip(skip)
     .limit(limit);
 
@@ -117,12 +128,6 @@ export const updateBlog = asyncHandler(async (req, res) => {
   res.status(200).json(blog);
 });
 
-// @desc     Delete a Blog
-// @route    /api/blog/:slug
-// @access   Private
-// @desc     Delete a Blog
-// @route    /api/blog/:slug
-// @access   Private
 // @desc     Delete a Blog
 // @route    /api/blog/:slug
 // @access   Private
