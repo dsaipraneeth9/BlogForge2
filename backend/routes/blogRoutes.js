@@ -36,7 +36,7 @@ router.post("/:slug/like", auth, ToggleLikeBlog);
 router.post("/:slug/bookmark", auth, toggleBookmarkBlog); // New route for bookmarking
 
 router.post("/:slug/comments", auth, createComment);
-router.get("/:slug/comments", auth, getComments);
+router.get("/:slug/comments", getComments);
 router.delete("/:slug/comments/:commentId", auth, deleteComment);
 
 export default router;

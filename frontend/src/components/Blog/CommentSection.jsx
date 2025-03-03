@@ -15,11 +15,9 @@ function CommentSection({ slug }) {
       try {
         const response = await getComments(slug);
         console.log('Fetched comments:', response.data);
-        setComments(response.data || []); // Ensure comments is always an array
-        setError('');
+        setComments(response.data || []); // Ensure comments are always displayed
       } catch (error) {
         console.error('Error fetching comments:', error);
-        setError('Failed to fetch comments');
       }
     };
     fetchComments();
@@ -51,29 +49,34 @@ function CommentSection({ slug }) {
       try {
         await deleteComment(slug, commentId);
         setComments(comments.filter((c) => c._id !== commentId));
-        setError('');
       } catch (err) {
-        setError('Failed to delete comment');
         console.error('Error deleting comment:', err);
+        setError('Failed to delete comment');
       }
     }
   };
 
   const canDeleteComment = (comment) => {
-    // Safely check if user and comment.user exist before accessing properties
     if (!user || !comment?.user) {
-      return false; // Default to false if user or comment.user is undefined
+      return false;
     }
-    const userId = user.id?.toString(); // Ensure user.id is a string or handle undefined
-    const commentUserId = comment.user._id?.toString(); // Ensure comment.user._id is a string or handle undefined
+    const userId = user.id?.toString();
+    const commentUserId = comment.user._id?.toString();
     return user.role === 'admin' || (userId && commentUserId && userId === commentUserId);
   };
 
   return (
-    <Box sx={{ bgcolor: 'background.default' }}>
-      <Typography variant="h5" sx={{ color: 'text.primary', bgcolor: 'background.paper', p: 2 }} gutterBottom>Comments</Typography>
-      {user ? (
-        <Box component="form" onSubmit={handleSubmit} sx={{ mb: 2, bgcolor: 'background.paper', p: 2 }}>
+    <Box sx={{ bgcolor: 'background.default', p: 2 }}>
+      {!user && (
+        <Typography sx={{ color: 'text.primary', bgcolor: 'background.paper', p: 2, mb: 2, borderRadius: 1, boxShadow: 1 }}>
+          Please login to comment and Like
+        </Typography>
+      )}
+      <Typography variant="h5" sx={{ color: 'text.primary', bgcolor: 'background.paper', p: 2, mb: 2, borderRadius: 1, boxShadow: 1 }} gutterBottom>
+        Comments
+      </Typography>
+      {user && (
+        <Box component="form" onSubmit={handleSubmit} sx={{ mb: 2, bgcolor: 'background.paper', p: 2, borderRadius: 1, boxShadow: 1 }}>
           <TextField
             label="Add a comment"
             fullWidth
@@ -88,11 +91,9 @@ function CommentSection({ slug }) {
           </Button>
           {error && <Alert severity="error" sx={{ mt: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}
         </Box>
-      ) : (
-        <Typography sx={{ color: 'text.primary', bgcolor: 'background.paper', p: 2 }}>Please login to comment</Typography>
       )}
-      <List sx={{ bgcolor: 'background.paper' }}>
-        {comments.map((comment) => (
+      <List sx={{ bgcolor: 'background.paper', borderRadius: 1, boxShadow: 1 }}>
+        {comments.length > 0 ? comments.map((comment) => (
           <div key={comment._id}>
             <ListItem
               secondaryAction={
@@ -120,9 +121,10 @@ function CommentSection({ slug }) {
             </ListItem>
             <Divider sx={{ bgcolor: 'background.paper', borderColor: 'text.secondary' }} />
           </div>
-        ))}
+        )) : (
+          <Typography sx={{ color: 'text.secondary', p: 2 }}>No comments yet, be the first one to Comment.</Typography>
+        )}
       </List>
-      {error && !user && <Alert severity="error" sx={{ mt: 2, bgcolor: 'background.paper', color: 'text.primary' }}>{error}</Alert>}
     </Box>
   );
 }

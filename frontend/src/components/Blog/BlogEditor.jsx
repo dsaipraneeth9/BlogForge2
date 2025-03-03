@@ -1,6 +1,6 @@
 import 'react-quill/dist/quill.snow.css';
 import { useState, useContext } from 'react';
-import { TextField, Button, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { TextField, Button, Box, FormControl, InputLabel, Select, MenuItem, Typography } from '@mui/material';
 import ReactQuill from 'react-quill';
 import { ThemeContext } from '../../contexts/ThemeContext.jsx';
 
@@ -10,6 +10,7 @@ function BlogEditor({ onSubmit, initialData = {} }) {
   const [content, setContent] = useState(initialData.content || '');
   const [category, setCategory] = useState(initialData.categories || '');
   const [featuredImage, setFeaturedImage] = useState(null);
+  const [fileName, setFileName] = useState('');
   const { mode } = useContext(ThemeContext);
 
   const categories = [
@@ -29,6 +30,14 @@ function BlogEditor({ onSubmit, initialData = {} }) {
     formData.append('categories', category);
     if (featuredImage) formData.append('featuredImage', featuredImage);
     onSubmit(formData);
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFeaturedImage(file);
+      setFileName(file.name);
+    }
   };
 
   const quillStyles = `
@@ -80,20 +89,35 @@ function BlogEditor({ onSubmit, initialData = {} }) {
         onChange={setContent}
         style={{ height: 300, marginBottom: 50 }}
       />
-      <Button
-        variant="outlined"
-        component="label"
-        sx={{ mt: 2, bgcolor: 'background.paper', color: 'text.primary', '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' } }}
+      
+      {/* File upload section with filename display */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, gap: 2 }}>
+        <Button
+          variant="outlined"
+          component="label"
+          sx={{ bgcolor: 'background.paper', color: 'text.primary', '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.1)' } }}
+        >
+          Choose File
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            hidden
+          />
+        </Button>
+        
+        {fileName && (
+          <Typography variant="body2" sx={{ color: 'text.primary' }}>
+            {fileName}
+          </Typography>
+        )}
+      </Box>
+      
+      <Button 
+        type="submit" 
+        variant="contained" 
+        sx={{ mt: 2, bgcolor: 'primary.main', color: 'white' }}
       >
-        Choose File
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFeaturedImage(e.target.files[0])}
-          hidden
-        />
-      </Button>
-      <Button type="submit" variant="contained" sx={{ mt: 2, bgcolor: 'primary.main', color: 'white' }}>
         {initialData.title ? 'Update Post' : 'Create Post'}
       </Button>
     </Box>
