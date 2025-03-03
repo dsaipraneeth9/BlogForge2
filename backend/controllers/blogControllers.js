@@ -1,33 +1,35 @@
 import Blog from "../models/Blog.js";
 import asyncHandler from "express-async-handler";
+import Notification from "../models/Notifications.js"; // Import Notification model
+import User from "../models/User.js"; // Import User model to fetch username
 
 // @desc     Get a Blog
 // @route    /api/blog/:slug
 // @access   Public
 export const getBlog = asyncHandler(async (req, res) => {
-    let { slug } = req.params;
-    const requestId = Date.now().toString() + Math.random().toString(36).substr(2, 9); // Unique request identifier
-    console.log(`Fetching blog with slug: ${slug}, requestId: ${requestId}, at: ${new Date().toISOString()}`);
-  
-    let blog = await Blog.findOne({ slug })
-      .populate("author", "username photo email -_id");
-  
-    if (!blog) {
-      res.status(404);
-      throw new Error("Blog not found");
-    }
-  
-    // Use a lock or check to prevent double increments (e.g., based on request timestamp or ID)
-    const currentViews = blog.views;
-    console.log(`Current views before increment: ${currentViews}, requestId: ${requestId}`);
-  
-    // Increment views only if not already incremented in this request (simplified for now)
-    blog.views += 1;
-    await blog.save({ validateBeforeSave: false });
-    console.log(`Views incremented to: ${blog.views}, requestId: ${requestId}`);
-  
-    res.status(200).json(blog);
-  });
+  let { slug } = req.params;
+  const requestId = Date.now().toString() + Math.random().toString(36).substr(2, 9); // Unique request identifier
+  console.log(`Fetching blog with slug: ${slug}, requestId: ${requestId}, at: ${new Date().toISOString()}`);
+
+  let blog = await Blog.findOne({ slug })
+    .populate("author", "username photo email -_id");
+
+  if (!blog) {
+    res.status(404);
+    throw new Error("Blog not found");
+  }
+
+  // Use a lock or check to prevent double increments (e.g., based on request timestamp or ID)
+  const currentViews = blog.views;
+  console.log(`Current views before increment: ${currentViews}, requestId: ${requestId}`);
+
+  // Increment views only if not already incremented in this request (simplified for now)
+  blog.views += 1;
+  await blog.save({ validateBeforeSave: false });
+  console.log(`Views incremented to: ${blog.views}, requestId: ${requestId}`);
+
+  res.status(200).json(blog);
+});
 
 // @desc     Post a Blog
 // @route    /api/blog
@@ -136,6 +138,7 @@ export const deleteBlog = asyncHandler(async (req, res) => {
   console.log(`Blog with slug ${slug} deleted successfully by user with role ${req.userRole}`);
   res.sendStatus(204);
 });
+
 // @desc   Toggle a Like
 // @route  /api/blog/:slug/like
 // @access  Private
@@ -147,6 +150,18 @@ export const ToggleLikeBlog = asyncHandler(async (req, res) => {
   });
   if (userIndex === -1) {
     blog.likes.push(req.userId);
+    // Fetch the liker's username
+    const liker = await User.findById(req.userId).select("username");
+    if (!liker) {
+      throw new Error("Liker not found");
+    }
+    // Create notification for the author with the liker's username
+    await Notification.create({
+      user: blog.author, // Notify the blog author
+      blog: blog._id,
+      type: 'like',
+      message: `${liker.username} liked your blog "${blog.title}"`,
+    });
   } else {
     blog.likes.splice(userIndex, 1);
   }
@@ -188,4 +203,3 @@ export const getBookmarkedBlogs = asyncHandler(async (req, res) => {
 
   res.status(200).json(bookmarkedBlogs);
 });
-

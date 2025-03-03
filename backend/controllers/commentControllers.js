@@ -2,38 +2,44 @@ import asyncHandler from "express-async-handler";
 import Blog from "../models/Blog.js";
 import Comment from "../models/Comment.js";
 import User from "../models/User.js"; // Import User model for role checking
+import Notification from "../models/Notifications.js"; // Import Notification model
 
 // @desc     Create a new comment
 // @route    POST /api/blog/:slug/comments
 // @access   Private (authenticated users only)
+
 export const createComment = asyncHandler(async (req, res) => {
-  const { slug } = req.params;
-  const { content } = req.body;
-
-  if (!content) {
-    res.status(400);
-    throw new Error("Content is required for comment");
-  }
-
-  const blog = await Blog.findOne({ slug });
-  if (!blog) {
-    res.status(404);
-    throw new Error("Blog not found!");
-  }
-
-  // req.userId is set by the auth middleware, ensuring only authenticated users can reach here
-  let comment = await Comment.create({
-    content,
-    user: req.userId,
-    blog: blog._id,
+    const { slug } = req.params;
+    const { content } = req.body;
+    if (!content) {
+      res.status(400);
+      throw new Error("Content is required for comment");
+    }
+    const blog = await Blog.findOne({ slug });
+    if (!blog) {
+      res.status(404);
+      throw new Error("Blog not found!");
+    }
+    let comment = await Comment.create({
+      content,
+      user: req.userId,
+      blog: blog._id,
+    });
+    blog.comments.push(comment._id);
+    await blog.save({ validateBeforeSave: false });
+    await comment.populate("user", "username photo role -_id");
+  
+    // Create notification for the author
+    const commenter = await User.findById(req.userId).select("username"); // Fetch commenter’s username
+    await Notification.create({
+      user: blog.author, // Notify the blog author
+      blog: blog._id,
+      type: 'comment',
+      message: `${commenter.username} commented on your blog "${blog.title}"`,
+    });
+  
+    res.status(201).json(comment);
   });
-
-  blog.comments.push(comment._id);
-  await blog.save({ validateBeforeSave: false });
-  await comment.populate("user", "username photo role -_id");
-
-  res.status(201).json(comment);
-});
 
 // @desc     Get all comments for a blog
 // @route    GET /api/blog/:slug/comments

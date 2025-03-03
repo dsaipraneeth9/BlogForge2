@@ -1,7 +1,7 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Box, Container } from '@mui/material';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import Header from './components/Common/Header.jsx';
+import Header from './components/Common/Header.jsx'; // Reverts to dropdown-based Header
 import Footer from './components/Common/Footer.jsx';
 import Home from './pages/Home.jsx';
 import BlogPost from './pages/BlogPost.jsx';
